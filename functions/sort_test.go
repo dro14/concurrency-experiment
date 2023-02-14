@@ -10,28 +10,47 @@ type testPair struct {
 	output []int
 }
 
-var test = []testPair{
-	{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
-	{[]int{8, 1, 5, 0, 3, 7, 2, 9, 6, 4}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
-	{[]int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}, []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}},
-	{[]int{7}, []int{7}},
-	{[]int{}, []int{}},
+func constructTests() []testPair {
+	var testCases []testPair
+
+	testCase := testPair{[]int{}, []int{}}
+	testCases = append(testCases, testCase)
+
+	for i := 0; i < 100; i++ {
+		testCase = testPair{[]int{i}, []int{i}}
+		testCases = append(testCases, testCase)
+	}
+
+	for i := 2; i < 1025; i++ {
+		testCase = testPair{MakeRandomArray(i), MakeSortedArray(i)}
+		testCases = append(testCases, testCase)
+	}
+
+	testCase = testPair{MakeSortedArray(1025), MakeSortedArray(1025)}
+	testCases = append(testCases, testCase)
+	testCase = testPair{MakeRandomArray(1025), MakeSortedArray(1025)}
+	testCases = append(testCases, testCase)
+	testCase = testPair{MakeReversedArray(1025), MakeSortedArray(1025)}
+	testCases = append(testCases, testCase)
+
+	return testCases
 }
 
 func TestMergeSortMulti(t *testing.T) {
-	for _, pair := range test {
-		n := len(pair.input)
-		array := make([]int, n)
-		buffer := make([]int, n)
-		copy(array, pair.input)
-		MergeSortMulti(array, buffer)
-		for i, v := range array {
-			if v != pair.output[i] {
+	tests := constructTests()
+	for _, test := range tests {
+		n := len(test.input)
+		arr := make([]int, n)
+		buf := make([]int, n)
+		copy(arr, test.input)
+		MergeSortMulti(arr, buf, 0, n)
+		for i, v := range arr {
+			if v != test.output[i] {
 				t.Error(
 					"[MergeSortMulti] ERROR:",
-					"\nfor:     ", pair.input,
-					"\nexpected:", pair.output,
-					"\ngot:     ", array,
+					"\nfor:     ", test.input,
+					"\nexpected:", test.output,
+					"\ngot:     ", arr,
 				)
 			}
 		}
@@ -39,19 +58,20 @@ func TestMergeSortMulti(t *testing.T) {
 }
 
 func TestMergeSortSingle(t *testing.T) {
-	for _, pair := range test {
-		n := len(pair.input)
-		array := make([]int, n)
-		buffer := make([]int, n)
-		copy(array, pair.input)
-		MergeSortSingle(array, buffer, 0, n)
-		for i, v := range array {
-			if v != pair.output[i] {
+	tests := constructTests()
+	for _, test := range tests {
+		n := len(test.input)
+		arr := make([]int, n)
+		buf := make([]int, n)
+		copy(arr, test.input)
+		MergeSortSingle(arr, buf, 0, n)
+		for i, v := range arr {
+			if v != test.output[i] {
 				t.Error(
 					"[MergeSortSingle] ERROR:",
-					"\nfor:     ", pair.input,
-					"\nexpected:", pair.output,
-					"\ngot:     ", array,
+					"\nfor:     ", test.input,
+					"\nexpected:", test.output,
+					"\ngot:     ", arr,
 				)
 			}
 		}
@@ -59,17 +79,18 @@ func TestMergeSortSingle(t *testing.T) {
 }
 
 func TestSort(t *testing.T) {
-	for _, pair := range test {
-		array := make([]int, len(pair.input))
-		copy(array, pair.input)
-		sort.Ints(array)
-		for i, v := range array {
-			if v != pair.output[i] {
+	tests := constructTests()
+	for _, test := range tests {
+		arr := make([]int, len(test.input))
+		copy(arr, test.input)
+		sort.Ints(arr)
+		for i, v := range arr {
+			if v != test.output[i] {
 				t.Error(
 					"[sort.Ints] ERROR:",
-					"\nfor:     ", pair.input,
-					"\nexpected:", pair.output,
-					"\ngot:     ", array,
+					"\nfor:     ", test.input,
+					"\nexpected:", test.output,
+					"\ngot:     ", arr,
 				)
 			}
 		}

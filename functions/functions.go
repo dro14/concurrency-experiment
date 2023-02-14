@@ -4,15 +4,41 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"time"
 )
 
-func FillRandomly(array []int) {
-	size := len(array)
-	rand.Seed(time.Now().UnixNano())
-	for j := 0; j < size; j++ {
-		array[j] = rand.Intn(size)
+func FillArrayRandomly(arr []int) {
+	n := len(arr)
+	for i := 0; i < n; i++ {
+		arr[i] = rand.Intn(n)
 	}
+}
+
+func MakeRandomArray(n int) []int {
+	arr := make([]int, n)
+	sorted := MakeSortedArray(n)
+	index := 0
+	for i := 0; i < n; i++ {
+		index = rand.Intn(len(sorted))
+		arr[i] = sorted[index]
+		sorted = append(sorted[:index], sorted[index+1:]...)
+	}
+	return arr
+}
+
+func MakeSortedArray(n int) []int {
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
+		arr[i] = i
+	}
+	return arr
+}
+
+func MakeReversedArray(n int) []int {
+	arr := make([]int, n)
+	for i := 0; i < n; i++ {
+		arr[i] = n - i - 1
+	}
+	return arr
 }
 
 func SaveResults(results []float64, cpu, iterations, size int, fileName string) {
@@ -22,7 +48,7 @@ func SaveResults(results []float64, cpu, iterations, size int, fileName string) 
 	}
 
 	_, err = fmt.Fprintf(file, `
-                                      GO
+                                       GO
 --------------------------------------------------------------------------------
 | Number of logical CPUs used = %d
 | Number of Iterations        = %d
