@@ -31,19 +31,28 @@ func mergeSortMulti(arr, buf []int, a, c, d int, done chan<- bool) {
 }
 
 func MergeSortSingle(arr, buf []int, a, c int) {
-	if c-a == 2 {
-		if arr[a] > arr[a+1] {
-			arr[a], arr[a+1] = arr[a+1], arr[a]
+	i := a + 1
+	for i < c {
+		if arr[i-1] > arr[i] {
+			arr[i-1], arr[i] = arr[i], arr[i-1]
 		}
-	} else {
-		b := (a + c) / 2
-		if b-a > 1 {
-			MergeSortSingle(arr, buf, a, b)
+		i += 2
+	}
+	n := c - a
+	var l, m, r int
+	for i = 2; i < n; i += i {
+		l = a
+		m = l + i
+		r = m + i
+		for r < c {
+			merge(arr, buf, l, m, r)
+			l = r
+			m = l + i
+			r = m + i
 		}
-		if c-b > 1 {
-			MergeSortSingle(arr, buf, b, c)
+		if m < c {
+			merge(arr, buf, l, m, c)
 		}
-		merge(arr, buf, a, b, c)
 	}
 }
 
