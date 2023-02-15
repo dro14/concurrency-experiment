@@ -3,7 +3,6 @@ package main
 import (
 	"concurrency_experiment/functions"
 	"runtime"
-	"sort"
 	"time"
 )
 
@@ -25,19 +24,19 @@ func main() {
 	}
 	functions.SaveResults(results, runtime.NumCPU(), iterations, size, "multi.txt")
 
-	for i := 0; i < iterations; i++ {
-		functions.FillArrayRandomly(array)
-		start := time.Now()
-		functions.MergeSortSingle(array, buffer, 0, size)
-		results[i] = time.Since(start).Seconds()
-	}
-	functions.SaveResults(results, runtime.NumGoroutine(), iterations, size, "single.txt")
-
-	for i := 0; i < iterations; i++ {
-		functions.FillArrayRandomly(array)
-		start := time.Now()
-		sort.Ints(array)
-		results[i] = time.Since(start).Seconds()
-	}
-	functions.SaveResults(results, runtime.NumGoroutine(), iterations, size, "builtin.txt")
+	//for i := 0; i < iterations; i++ {
+	//	functions.FillArrayRandomly(array)
+	//	start := time.Now()
+	//	functions.MergeSortSingle(array, buffer, 0, size)
+	//	results[i] = time.Since(start).Seconds()
+	//}
+	//functions.SaveResults(results, runtime.NumGoroutine(), iterations, size, "single.txt")
+	//
+	//for i := 0; i < iterations; i++ {
+	//	functions.FillArrayRandomly(array)
+	//	start := time.Now()
+	//	sort.Ints(array)
+	//	results[i] = time.Since(start).Seconds()
+	//}
+	//functions.SaveResults(results, runtime.NumGoroutine(), iterations, size, "builtin.txt")
 }

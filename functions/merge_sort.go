@@ -1,36 +1,54 @@
 package functions
 
-import "runtime"
+import (
+	"runtime"
+)
 
-func MergeSortMulti(arr, buf []int, start, size int) {
-	cpu := runtime.NumCPU()
-	divisions := 0
-	for i := cpu; i >= 2; i /= 2 {
-		divisions++
-	}
+func MergeSortMulti(arr, buf []int, a, c int) {
+	n := c - a
+	g := runtime.NumCPU()
+	m := n / g
+
 	done := make(chan bool)
-	go mergeSortMulti(arr, buf, start, size, divisions, done)
-	<-done
-}
-
-func mergeSortMulti(arr, buf []int, a, c, d int, done chan<- bool) {
-	b := (a + c) / 2
-	if d > 0 {
-		d--
-		wait := make(chan bool)
-		go mergeSortMulti(arr, buf, a, b, d, wait)
-		go mergeSortMulti(arr, buf, b, c, d, wait)
-		<-wait
-		<-wait
-	} else {
-		MergeSortSingle(arr, buf, a, b)
-		MergeSortSingle(arr, buf, b, c)
+	l := a
+	r := a + m
+	var i int
+	for i = 1; i < g; i++ {
+		go MergeSortSingle(arr, buf, l, r, done)
+		l = r
+		r += m
 	}
-	merge(arr, buf, a, b, c)
-	done <- true
+	r = a + c
+	go MergeSortSingle(arr, buf, l, r, done)
+
+	for i = 0; i < g; i++ {
+		<-done
+	}
+
+	var count int
+	for i = m; i < n; i += i {
+		count = 0
+		l = a
+		m = l + i
+		r = m + i
+		for r < c {
+			count++
+			go mergeMulti(arr, buf, l, m, r, done)
+			l = r
+			m = l + i
+			r = m + i
+		}
+		if m < c {
+			count++
+			go mergeMulti(arr, buf, l, m, c, done)
+		}
+		for j := 0; j < count; j++ {
+			<-done
+		}
+	}
 }
 
-func MergeSortSingle(arr, buf []int, a, c int) {
+func MergeSortSingle(arr, buf []int, a, c int, done chan<- bool) {
 	i := a + 1
 	for i < c {
 		if arr[i-1] > arr[i] {
@@ -45,18 +63,19 @@ func MergeSortSingle(arr, buf []int, a, c int) {
 		m = l + i
 		r = m + i
 		for r < c {
-			merge(arr, buf, l, m, r)
+			mergeSingle(arr, buf, l, m, r)
 			l = r
 			m = l + i
 			r = m + i
 		}
 		if m < c {
-			merge(arr, buf, l, m, c)
+			mergeSingle(arr, buf, l, m, c)
 		}
 	}
+	done <- true
 }
 
-func merge(arr, buf []int, a, b, c int) {
+func mergeSingle(arr, buf []int, a, b, c int) {
 	copy(buf[a:c], arr[a:c])
 	i, j := a, b
 	for i < b && j < c {
@@ -74,4 +93,25 @@ func merge(arr, buf []int, a, b, c int) {
 	} else {
 		copy(arr[a:c], buf[j:c])
 	}
+}
+
+func mergeMulti(arr, buf []int, a, b, c int, done chan<- bool) {
+	copy(buf[a:c], arr[a:c])
+	i, j := a, b
+	for i < b && j < c {
+		if buf[i] < buf[j] {
+			arr[a] = buf[i]
+			i++
+		} else {
+			arr[a] = buf[j]
+			j++
+		}
+		a++
+	}
+	if i < b {
+		copy(arr[a:c], buf[i:b])
+	} else {
+		copy(arr[a:c], buf[j:c])
+	}
+	done <- true
 }
